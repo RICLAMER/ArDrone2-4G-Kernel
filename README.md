@@ -28,17 +28,22 @@ Connected in Ar Drone in telnet, run this command: uname -a
 In my case, i received the line: Linux uclibc 2.6.32.9-g980dab2 #1 PREEMPT Mon Sep 16 11:50:23 CEST 2013 armv7l GNU/Linux
 
 4 - OK, now in ubuntu, lest make donwload of this version of Kernel 2.6.32-9.
-under folder /usr/projkernek, apply the command: sudo wget https://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.32.9.tar.bz2
+under folder /usr/projkernek, apply the command: 
 
-5 - After the sucess in download; 100%[======================================>] 64.374.628  1,04MB/s   in 65s
-2014-12-20 04:33:24 (964 KB/s) - ‘linux-2.6.32.9.tar.bz2’ saved [64374628/64374628]
-We need to descompress the content.  it can be with the command:  
-  :~$ tar xjvf linux-2.6.32.9.tar.bz2
+sudo wget https://devzone.parrot.com/repositories/entry/oss-ardrone2/trunk/linux.tar.gz?format=raw
+
+Now Rename this file to a apropriate name
+
+: sudo mv linux.tar.gz?format=raw linux.tar.gz
+
+5 - We need to descompress the content.  it can be with the command:  
+
+: sudo tar -xzvf linux.tar.gz
 
 6 - Now, open the diziped folder and open the file Makefile
-: cd ./usr/projkernel/linux-2.6.32.9$
+: cd ./usr/projkernel
 to list all files, enter the command
-:~$ ls
+: ls
 Result -->
 riclamer@HyperUbuntu:/usr/projkernel/linux-2.6.32.9$ ls
 arch     crypto         fs       Kbuild       Makefile  REPORTING-BUGS  sound
@@ -73,6 +78,66 @@ NAME = Man-Eating Seals of Antiquity
 7 - Let's configure the Kernel, to inform what processor will be used.
 :~$ export ARCH=arm
 :~$ export CROSS_COMPILE=arm-linux-gnueabi-
+
+7 - Lets to save a copy of kerner, after apply make.
+
+sudo cp -rp /usr/projkernel /usr/kernel-build
+
+8 - Now we need to open the kernel.config file in folder /usr/projkernel to enable the drivers and modules.
+
+: sudo nano make.config
+
+Now, in the line 813, change to:
+CONFIG_SCSI_NETLINK=y
+line 875:
+CONFIG_WLAN=y
+line 888:
+CONFIG_USB_USBNET=y
+line 889:
+CONFIG_WAN=y
+
+ Now we need to save the change.  Press CTRL + O folowwed with ENtER, then CTRL + X to exit.
+ 
+ 9 - Now we need to make a copy of kernel.config in folder /usr/projkernel to arch/arm/config folder.
+ 
+ : sudo cp -rp kernel.config /usr/projkernel/arch/arm/configs/ardrone_defconfig
+ 
+ and make the .config file to be processed with make
+ 
+ : sudo cp -rp kernel.config /usr/projkernel/.config
+ 
+ 10 - All right, now is the time to  MAKE the kernel. in folder /usr/projkernel/, apply this command:
+ 
+ : sudo make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
+
+now very question are displayerd to you confirm. in my teste, you can just set "y" to necessary drivers. Some drivers WiFI, are not necessary. 
+
+
+---ERROR COMPILER----
+If you received this error:
+
+make[1]: *** No rule to make target `n/n', needed by `firmware/n.gen.o'.  Stop.
+make: *** [firmware] Error 2
+
+... you kernel not compiled. you need to cleam your build and compiler again, só apply this command:
+: make clean
+: make distclean
+
+Now Run make again:
+
+: sudo make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
+
+Now be alert with this 2 option:
+
+  "Include in-kernel firmware blobs in kernel binary (FIRMWARE_IN_KERNEL) [Y/n/?] (NEW) "
+I selected no.
+
+  "External firmware blobs to build into the kernel binary (EXTRA_FIRMWARE) [] (NEW) "
+Just hit enter after this one. Continue normally on all other questions.
+
+
+
+
 
 
 
